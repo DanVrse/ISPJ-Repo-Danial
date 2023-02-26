@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ERROR 404</title>
+</head>
+<body>
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,900" rel="stylesheet">
+    <!-- Custom stylesheet -->
+    <link type="text/css" rel="stylesheet" href="{{url_for('static', filename='/error_files/css/style.css')}}">
+
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div id="notfound">
+    <div class="notfound">
+        <div class="notfound-404">
+            <h1>Oops!</h1>
+        </div>
+        <h2 style="display: inline-block;">Error 404 - Page not found</h2>
+        <img src="/static/images/404/200.gif" alt="" style="display: inline-block;">
+        <p>The page you are looking for might have been removed, had its name changed or is temporarily unavailable.</p>
+
+        <p>Looks like you had the wrong order. Maybe you should go back...</p>
+
+        <p>Waiting here is only going to give Patrick an overdose</p>
+        <a href="{{url_for('login')}}">Go To Homepage</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

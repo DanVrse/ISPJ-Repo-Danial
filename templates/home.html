@@ -1,0 +1,997 @@
+<html>
+<head>
+    <title>Drag and Drop File Upload using DropzoneJS Python Flask PostgreSQL</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+    <!--         <link rel="stylesheet" href="css/uikit.min.css" />-->
+    <!--        <script src="js/uikit.min.js"></script>-->
+    <!--        <script src="js/uikit-icons.min.js"></script>-->
+</head>
+
+<style>
+
+.context-menu{
+  display: none;
+  position: absolute;
+  z-index: 10;
+  padding: 12px 0;
+  width: 240px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.context-menu--active {
+  display: block;
+}
+
+.context-menu__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu__item {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.context-menu__item:last-child {
+  margin-bottom: 0;
+}
+
+.context-menu__link {
+  display: block;
+  padding: 4px 12px;
+  color: #0066aa;
+  text-decoration: none;
+}
+
+.context-menu__link:hover {
+  color: #fff;
+  background-color: #0066aa;
+}
+
+/* context menu */
+
+.context-menu-dir {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  padding: 12px 0;
+  width: 240px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.context-menu--active {
+  display: block;
+}
+
+.context-menu__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu__item {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.context-menu__item:last-child {
+  margin-bottom: 0;
+}
+
+.context-menu__link {
+  display: block;
+  padding: 4px 12px;
+  color: #0066aa;
+  text-decoration: none;
+}
+
+.context-menu__link:hover {
+  color: #fff;
+  background-color: #0066aa;
+}
+
+
+
+</style>
+<body>
+<nav class="uk-navbar-container" uk-navbar>
+
+    <div class="uk-navbar-left">
+
+        <ul class="uk-navbar-nav">
+            <li class="uk-active"><a href="{{ url_for('home') }}">Home</a></li>
+            <li>
+            {% if root == True %}
+            <li class="uk-active"><a href="{{ url_for('assignrole') }}">Roles and Users</a></li>
+            <li>
+                {% endif %}
+<li class="uk-active"><a href="{{ url_for('waterm') }}">watermark</a></li>
+            <li>
+        </ul>
+
+    </div>
+
+
+</nav>
+{% if session["root"] != None %}
+<div class="context-container" style="border:1px solid; margin: 3vw; height:75%;border-radius:30px;">
+    <form method="post" action="{{ url_for('logout') }}" style="">
+
+        <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">LOGOUT
+        </button>
+    </form>
+    {% if back == True %}
+    <form method="post" action="{{ url_for('home') }}">
+        <input type="text" id="opt" name="opt" value="back" hidden>
+        <button class="uk-button uk-button-default" value="back" name="back" type="submit">BACK</button>
+    </form>
+    {% endif %}
+
+
+    <!--                Leland's DLP MODAL-->
+    <div id="maskingModal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Mask Settings</h2>
+
+            <form id="maskingForm" action="" class="uk-form-stacked" method="get">
+                <fieldset class="uk-fieldset">
+                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                        <input hidden id="fileInput" name="file" type="text">
+                        <input type="text" hidden name="mask">
+                        <label><input name="email" class="uk-checkbox" type="checkbox" checked> Emails</label>
+                        <label><input name="phone" class="uk-checkbox" type="checkbox" checked> Phone Numbers</label>
+                        <label><input name="nric" class="uk-checkbox" type="checkbox" checked> NRIC</label>
+                    </div>
+                </fieldset>
+            </form>
+            <button class="uk-modal-close uk-button" type="button"
+                    onclick="document.getElementById('maskingForm').submit();">Download
+            </button>
+        </div>
+    </div>
+
+
+    <div class="uk-container">
+
+        <div class="uk-container">
+
+            <div class="">
+
+                {% for file in files %}
+
+  {% if file in files[3::3] %}
+                    <br><br><br><br>
+                    {% endif %}
+                <div class="uk-card uk-margin-left" style="padding: 0;float: left;margin-bottom:10px;">
+
+                    <button class="uk-button uk-button-default " type="button"
+                            uk-toggle="target: #offcanvas-flip_{{file[4]}}">
+                        <span uk-icon="icon: file"></span> {{ file[0] }}
+                    </button>
+
+                    <div id="offcanvas-flip_{{file[4]}}" uk-offcanvas="flip: true; overlay: true">
+
+                        <div class="uk-offcanvas-bar">
+
+                            <button class="uk-offcanvas-close" type="button" uk-close></button>
+
+                            <h3>{{ file[0] }}</h3>
+                            {% if file[1] < 1024 %}
+                            <p>Size: {{ file[1] }}bytes</p>
+                            {% elif file[1] >= 1024 %}
+                            <p>Size: {{ (file[1]/1024)| round }}KB</p>
+                            {% elif file[1] >= 1048576 %}
+                            <p>Size: {{ (file[1]/1048576)| round }}MB</p>
+                            {% endif %}
+                            <p>Last Modified Date: {{ file[2] }}</p>
+                            <p>Created on: {{ file[3] }}</p>
+                            <a href="{{ url_for('download', file=file[0]) }}">
+                                Download
+                            </a><br>
+
+                            {% if edit ==True %}
+                            <a href="{{ url_for('permission', thing=file[0]) }}">
+                                Edit
+                            </a><br>
+                            {% endif %}
+                            {% if delete ==True %}
+
+                            <a href="{{ url_for('removefile', thing=file[0]) }}">
+                                Delete
+                            </a>
+
+                            <br><br><br>
+                            <button class="uk-button uk-button-text" uk-toggle="target: #maskingModal" type="button"
+                                    onclick="document.getElementById('maskingForm').action = '{{ url_for('download') }}';document.getElementById('fileInput').value = '{{ file[0] }}'">
+                                Download with Mask
+                            </button>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {% endfor %}
+                <br><br><br><br>
+                <hr>
+                <h3>Directories</h3>
+
+                {% for dir in directory %}
+                <div class="uk-card uk-margin-left direc" id="{{ dir }}"
+                     style="padding: 0;float: left;">
+                    <form action="{{ url_for('home') }}" method="post">
+                        <button class="uk-button uk-button-default" type="submit"><span uk-icon="icon: folder"></span> {{
+                            dir }}
+                        </button>
+                        <input type="text" id="filepage" name="filepage" value="{{ dir }}" hidden>
+                        <input type="text" id="opt" name="opt" value="filepath" hidden>
+                    </form>
+
+
+                </div>
+                {% endfor %}
+
+
+            </div>
+
+        </div>
+        {% if creation == True %}
+
+        <form method="post" action="{{ url_for('createfolder') }}" style="margin-top:0%;">
+
+
+            <div class="uk-margin">
+                <div class="uk-inline">
+                    <span class="uk-form-icon" uk-icon="icon: user"></span>
+                    <input class="uk-input uk-form-large" type="text" name="Folder" placeholder="Folder Name"
+                           style="width:20vw;" required>
+                </div>
+            </div>
+            <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">
+                SUBMIT
+            </button>
+
+        </form>
+        {% endif %}
+        {% if upload == True %}
+        <div class="container" style="bottom: 0;position: fixed;margin-bottom: 5%;margin-top: 5%;">
+            {% if no == 'no' %}
+            <p style="top-margin:30px;">No permission!</p>
+            {% elif no == 'yes' %}
+            <p style="top-margin:30px;">File Uploaded!</p>
+            {% endif %}
+            <div class="dropzone" id="dropzone">
+                <div class="dz-message needsclick">
+                    <h1>Drop files here or click to upload.</h1>
+
+                </div>
+            </div>
+
+
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!--<div id="context-menu" style="opacity: 1;">-->
+<!--  <div class="item" id="context-create-folder">-->
+<!--    <a class="uk-button uk-button-default" href="#modal-center_1" uk-toggle style="border:0; display:flex; justify-content:center;">Create Folder</a>-->
+
+<!--<div id="modal-center_1" class="uk-flex-top uk-modal" >-->
+<!--    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">-->
+
+
+<!--      <form method="post" action="{{ url_for('createfolder') }}" style="margin-top:20%;">-->
+
+
+<!--    <div class="uk-margin">-->
+<!--        <div class="uk-inline">-->
+<!--            <span class="uk-form-icon" uk-icon="icon: user"></span>-->
+<!--            <input class="uk-input uk-form-large" type="text" name="Folder" placeholder="Folder Name" style="width:20vw;" required>-->
+<!--        </div>-->
+<!--    </div>-->
+<!-- <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">SUBMIT</button>-->
+<!--            </form>-->
+
+<!--    </div>-->
+<!--</div>-->
+<!--  </div>-->
+
+
+<!--  <div class="item" id="context-upload-file">-->
+<!--    <a class="uk-button uk-button-default" href="#modal-center_2" uk-toggle style="border:0; display:flex; justify-content:center;">Upload File</a>-->
+
+<!--<div id="modal-center_2" class="uk-flex-top uk-modal" >-->
+<!--    <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">-->
+
+
+<!--      <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" >-->
+<!--  <input type="file" id="file" name="file">-->
+<!--  <input type="submit">-->
+<!--</form>-->
+
+<!--    </div>-->
+<!--</div>-->
+<!--  </div>-->
+<!--  <div class="item" id="context-upload-folder">-->
+<!--    <i class="fa fa-paste"></i> COPY-->
+<!--  </div>-->
+<!--</div>-->
+
+<nav id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+        <li class="context-menu__item">
+
+            <a class="uk-button uk-button-default context-menu__link" href="#modal-center" uk-toggle>create folder</a>
+
+            <div id="modal-center" class="uk-flex-top" uk-modal>
+                <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+
+                    <button class="uk-modal-close-default" type="button" uk-close></button>
+
+                    <form method="post" action="{{ url_for('createfolder') }}" style="margin-top:0%;">
+
+
+                        <div class="uk-margin">
+                            <div class="uk-inline">
+                                <span class="uk-form-icon" uk-icon="icon: user"></span>
+                                <input class="uk-input uk-form-large" type="text" name="Folder"
+                                       placeholder="Folder Name"
+                                       style="width:20vw;" required>
+                            </div>
+                        </div>
+                        <button class="uk-button uk-button-secondary uk-button-large"
+                                style="margin: 1%;border-radius: 10px;">
+                            SUBMIT
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <!--            <a href="#" class="context-menu__link" data-action="View"><i class="fa fa-eye"></i> Viewww Task</a>-->
+        </li>
+        <li class="context-menu__item">
+            <a class="uk-button uk-button-default context-menu__item" href="#modal-center2" uk-toggle>Upload</a>
+
+            <div id="modal-center2" class="uk-flex-top" uk-modal>
+                <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+
+                    <button class="uk-modal-close-default" type="button" uk-close></button>
+
+                    <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+                        <input type="file" id="file" name="file">
+                        <input type="submit">
+                    </form>
+                </div>
+            </div>
+
+            <!--            <a href="#" class="context-menu__link" data-action="Edit"><i class="fa fa-edit"></i> Edit Task</a>-->
+        </li>
+<!--        <li class="context-menu__item">-->
+<!--            <a href="#" class="context-menu__link" data-action="Delete"><i class="fa fa-times"></i> Delete Task</a>-->
+<!--        </li>-->
+    </ul>
+</nav>
+
+{% if dir_delete == True %}
+<nav id="context-menu-dir" class="context-menu-dir">
+    <ul class="context-menu__items">
+{% if change_perm == True %}
+        <li class="context-menu__item ">
+            <a href="{{ url_for('dirpermission') }}" class="uk-button uk-button-default context-menu__item" id="editdir"> Edit Task</a>
+        </li>
+        {% endif %}
+        <li class="context-menu__item">
+            <a class="uk-button uk-button-default context-menu__item" href="#modal-center3" uk-toggle>Delete</a>
+
+            <div id="modal-center3" class="uk-flex-top" uk-modal>
+                <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical">
+
+                    <button class="uk-modal-close-default" type="button" uk-close></button>
+
+                    <form method="post"  id="deleteform" action="" enctype="multipart/form-data">
+                        <p>You sure you want to delete the whole directory?</p>
+                        <button class="uk-button uk-button-secondary uk-button-large"
+                                style="margin: 1%;border-radius: 10px;">
+                            YES
+                        </button>
+                    </form>
+                </div>
+            </div>
+            </li>
+    </ul>
+</nav>
+{% endif %}
+<script>
+    (function() {
+
+  "use strict";
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // H E L P E R    F U N C T I O N S
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Function to check if we clicked inside an element with a particular class
+   * name.
+   *
+   * @param {Object} e The event
+   * @param {String} className The class name to check against
+   * @return {Boolean}
+   */
+  function clickInsideElement( e, className ) {
+    var el = e.srcElement || e.target;
+
+    if ( el.classList.contains(className) ) {
+      return el;
+    } else {
+      while ( el = el.parentNode ) {
+        if ( el.classList && el.classList.contains(className) ) {
+          return el;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Get's exact position of event.
+   *
+   * @param {Object} e The event passed in
+   * @return {Object} Returns the x and y position
+   */
+  function getPosition(e) {
+    var posx = 0;
+    var posy = 0;
+
+    if (!e) var e = window.event;
+
+    if (e.pageX || e.pageY) {
+      posx = e.pageX;
+      posy = e.pageY;
+    } else if (e.clientX || e.clientY) {
+      posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+      posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    }
+
+    return {
+      x: posx,
+      y: posy
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // C O R E    F U N C T I O N S
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Variables.
+   */
+  var contextMenuClassName = "context-menu-dir";
+  var contextMenuItemClassName = "context-menu__item";
+  var contextMenuLinkClassName = "context-menu__link";
+  var contextMenuActive = "context-menu--active";
+
+  var taskItemClassName = "direc";
+  var taskItemInContext;
+
+  var clickCoords;
+  var clickCoordsX;
+  var clickCoordsY;
+
+  var menu = document.querySelector("#context-menu-dir");
+  var menuItems = menu.querySelectorAll(".context-menu__item");
+  var menuState = 0;
+  var menuWidth;
+  var menuHeight;
+  var menuPosition;
+  var menuPositionX;
+  var menuPositionY;
+
+  var windowWidth;
+  var windowHeight;
+
+  /**
+   * Initialise our application's code.
+   */
+  function init() {
+    contextListener();
+    clickListener();
+    keyupListener();
+    resizeListener();
+  }
+
+  /**
+   * Listens for contextmenu events.
+   */
+  function contextListener() {
+    document.addEventListener( "contextmenu", function(e) {
+      taskItemInContext = clickInsideElement( e, taskItemClassName );
+
+      if ( taskItemInContext ) {
+        e.preventDefault();
+        toggleMenuOn();
+        positionMenu(e);
+        console.log(taskItemInContext.id)
+        var anchor = document.getElementById('deleteform');
+        anchor.action = '{{ url_for('removefile') }}?thing=' + taskItemInContext.id;
+        var editdir =document.getElementById('editdir');
+        editdir.href = '{{ url_for('dirpermission') }}?thing=' + taskItemInContext.id;
+      } else {
+        taskItemInContext = null;
+        toggleMenuOff();
+      }
+    });
+  }
+
+  /**
+   * Listens for click events.
+   */
+  function clickListener() {
+    document.addEventListener( "click", function(e) {
+      var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
+
+      if ( clickeElIsLink ) {
+        e.preventDefault();
+        menuItemListener( clickeElIsLink );
+
+      } else {
+        var button = e.which || e.button;
+        if ( button === 1 ) {
+          toggleMenuOff();
+        }
+      }
+    });
+  }
+
+  /**
+   * Listens for keyup events.
+   */
+  function keyupListener() {
+    window.onkeyup = function(e) {
+      if ( e.keyCode === 27 ) {
+        toggleMenuOff();
+      }
+    }
+  }
+
+  /**
+   * Window resize event listener
+   */
+  function resizeListener() {
+    window.onresize = function(e) {
+      toggleMenuOff();
+    };
+  }
+
+  /**
+   * Turns the custom context menu on.
+   */
+  function toggleMenuOn() {
+    if ( menuState !== 1 ) {
+      menuState = 1;
+      menu.classList.add( contextMenuActive );
+    }
+  }
+
+  /**
+   * Turns the custom context menu off.
+   */
+  function toggleMenuOff() {
+    if ( menuState !== 0 ) {
+      menuState = 0;
+      menu.classList.remove( contextMenuActive );
+    }
+  }
+
+  /**
+   * Positions the menu properly.
+   *
+   * @param {Object} e The event
+   */
+  function positionMenu(e) {
+    clickCoords = getPosition(e);
+    clickCoordsX = clickCoords.x;
+    clickCoordsY = clickCoords.y;
+
+    menuWidth = menu.offsetWidth + 4;
+    menuHeight = menu.offsetHeight + 4;
+
+    windowWidth = window.innerWidth;
+    windowHeight = window.innerHeight;
+
+    if ( (windowWidth - clickCoordsX) < menuWidth ) {
+      menu.style.left = windowWidth - menuWidth + "px";
+    } else {
+      menu.style.left = clickCoordsX + "px";
+    }
+
+    if ( (windowHeight - clickCoordsY) < menuHeight ) {
+      menu.style.top = windowHeight - menuHeight + "px";
+    } else {
+      menu.style.top = clickCoordsY + "px";
+    }
+  }
+
+  /**
+   * Dummy action function that logs an action when a menu item link is clicked
+   *
+   * @param {HTMLElement} link The link that was clicked
+   */
+  function menuItemListener( link ) {
+    console.log( "Task ID - " + taskItemInContext.getAttribute("data-id") + ", Task action - " + link.getAttribute("data-action"));
+    toggleMenuOff();
+  }
+
+  /**
+   * Run the app.
+   */
+  init();
+
+})();
+
+
+
+
+</script>
+
+<script>
+    (function() {
+
+  "use strict";
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // H E L P E R    F U N C T I O N S
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Function to check if we clicked inside an element with a particular class
+   * name.
+   *
+   * @param {Object} e The event
+   * @param {String} className The class name to check against
+   * @return {Boolean}
+   */
+  function clickInsideElement( e, className ) {
+    var el = e.srcElement || e.target;
+
+    if ( el.classList.contains(className) ) {
+      return el;
+    } else {
+      while ( el = el.parentNode ) {
+        if ( el.classList && el.classList.contains(className) ) {
+          return el;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Get's exact position of event.
+   *
+   * @param {Object} e The event passed in
+   * @return {Object} Returns the x and y position
+   */
+  function getPosition(e) {
+    var posx = 0;
+    var posy = 0;
+
+    if (!e) var e = window.event;
+
+    if (e.pageX || e.pageY) {
+      posx = e.pageX;
+      posy = e.pageY;
+    } else if (e.clientX || e.clientY) {
+      posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+      posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+    }
+
+    return {
+      x: posx,
+      y: posy
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // C O R E    F U N C T I O N S
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Variables.
+   */
+  var contextMenuClassName = "context-menu";
+  var contextMenuItemClassName = "context-menu__item";
+  var contextMenuLinkClassName = "context-menu__link";
+  var contextMenuActive = "context-menu--active";
+
+  var taskItemClassName = "context-container";
+  var taskItemInContext;
+
+  var clickCoords;
+  var clickCoordsX;
+  var clickCoordsY;
+
+  var menu = document.querySelector("#context-menu");
+  var menuItems = menu.querySelectorAll(".context-menu__item");
+  var menuState = 0;
+  var menuWidth;
+  var menuHeight;
+  var menuPosition;
+  var menuPositionX;
+  var menuPositionY;
+
+  var windowWidth;
+  var windowHeight;
+
+  /**
+   * Initialise our application's code.
+   */
+  function init() {
+    contextListener();
+    clickListener();
+    keyupListener();
+    resizeListener();
+  }
+
+  /**
+   * Listens for contextmenu events.
+   */
+  function contextListener() {
+    document.addEventListener( "contextmenu", function(e) {
+      taskItemInContext = clickInsideElement( e, taskItemClassName );
+
+      if ( taskItemInContext ) {
+        e.preventDefault();
+        toggleMenuOn();
+        positionMenu(e);
+        console.log(taskItemInContext.id)
+      } else {
+        taskItemInContext = null;
+        toggleMenuOff();
+      }
+    });
+  }
+
+  /**
+   * Listens for click events.
+   */
+  function clickListener() {
+    document.addEventListener( "click", function(e) {
+      var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
+
+      if ( clickeElIsLink ) {
+        e.preventDefault();
+        menuItemListener( clickeElIsLink );
+      } else {
+        var button = e.which || e.button;
+        if ( button === 1 ) {
+          toggleMenuOff();
+        }
+      }
+    });
+  }
+
+  /**
+   * Listens for keyup events.
+   */
+  function keyupListener() {
+    window.onkeyup = function(e) {
+      if ( e.keyCode === 27 ) {
+        toggleMenuOff();
+      }
+    }
+  }
+
+  /**
+   * Window resize event listener
+   */
+  function resizeListener() {
+    window.onresize = function(e) {
+      toggleMenuOff();
+    };
+  }
+
+  /**
+   * Turns the custom context menu on.
+   */
+  function toggleMenuOn() {
+    if ( menuState !== 1 ) {
+      menuState = 1;
+      menu.classList.add( contextMenuActive );
+    }
+  }
+
+  /**
+   * Turns the custom context menu off.
+   */
+  function toggleMenuOff() {
+    if ( menuState !== 0 ) {
+      menuState = 0;
+      menu.classList.remove( contextMenuActive );
+    }
+  }
+
+  /**
+   * Positions the menu properly.
+   *
+   * @param {Object} e The event
+   */
+  function positionMenu(e) {
+    clickCoords = getPosition(e);
+    clickCoordsX = clickCoords.x;
+    clickCoordsY = clickCoords.y;
+
+    menuWidth = menu.offsetWidth + 4;
+    menuHeight = menu.offsetHeight + 4;
+
+    windowWidth = window.innerWidth;
+    windowHeight = window.innerHeight;
+
+    if ( (windowWidth - clickCoordsX) < menuWidth ) {
+      menu.style.left = windowWidth - menuWidth + "px";
+    } else {
+      menu.style.left = clickCoordsX + "px";
+    }
+
+    if ( (windowHeight - clickCoordsY) < menuHeight ) {
+      menu.style.top = windowHeight - menuHeight + "px";
+    } else {
+      menu.style.top = clickCoordsY + "px";
+    }
+  }
+
+  /**
+   * Dummy action function that logs an action when a menu item link is clicked
+   *
+   * @param {HTMLElement} link The link that was clicked
+   */
+  function menuItemListener( link ) {
+    console.log( "Task ID - " + taskItemInContext.getAttribute("data-id") + ", Task action - " + link.getAttribute("data-action"));
+    toggleMenuOff();
+  }
+
+  /**
+   * Run the app.
+   */
+  init();
+
+})();
+
+
+
+
+</script>
+
+
+<script>
+$(document).ready(function(){
+    $(".dropzone").dropzone({
+      url: '/upload',
+      width: 300,
+      height: 300,
+      progressBarWidth: '100%',
+      maxFileSize: '20MB'
+
+    })
+
+    });
+
+window.onload = function () {
+setInterval(refreshPolling, 1000);
+}
+
+function refreshPolling() {
+dz = document.getElementById('dropzone');
+var flag = dz.classList.contains('dz-started');
+if (flag)
+    location.reload()
+}
+
+<!--    var myDropzone = new Dropzone("#dropzone");-->
+<!--    myDropzone.on("success", function() {-->
+<!--        location.reload()-->
+<!--    });-->
+
+
+
+</script>
+<script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+
+
+
+</script>
+
+<!--  <script >-->
+
+<!--document.getElementById('context-container').addEventListener("contextmenu",function(event){-->
+<!--  event.preventDefault();-->
+<!--  var contextElement = document.getElementById("context-menu");-->
+<!--  contextElement.style.top = mouseY(event) + "px";-->
+<!--  contextElement.style.left = mouseX(event) + "px";-->
+<!--  contextElement.classList.add("active");-->
+<!--});-->
+<!--document.getElementById('context-container').addEventListener("click",function(){-->
+<!--  document.getElementById("context-menu").classList.remove("active");});-->
+
+<!--document.getElementById('context-create-folder').addEventListener("click",function(){-->
+<!--  document.getElementById("context-menu").classList.remove("active");-->
+<!--});-->
+
+<!--document.getElementById('context-upload-file').addEventListener("click",function(){-->
+<!--  document.getElementById("context-menu").classList.remove("active");-->
+<!--});-->
+<!--document.getElementById('context-upload-folder').addEventListener("click",function(){-->
+<!--  document.getElementById("context-menu").classList.remove("active");-->
+<!--});-->
+
+<!--function mouseX(evt) {-->
+<!--  if (evt.pageX) {-->
+<!--    return evt.pageX;-->
+<!--  } else if (evt.clientX) {-->
+<!--    return evt.clientX + (document.documentElement.scrollLeft ?-->
+<!--      document.documentElement.scrollLeft :-->
+<!--      document.body.scrollLeft);-->
+<!--  } else {-->
+<!--    return null;-->
+<!--  }-->
+<!--}-->
+
+<!--function mouseY(evt) {-->
+<!--  if (evt.pageY) {-->
+<!--    return evt.pageY;-->
+<!--  } else if (evt.clientY) {-->
+<!--    return evt.clientY + (document.documentElement.scrollTop ?-->
+<!--      document.documentElement.scrollTop :-->
+<!--      document.body.scrollTop);-->
+<!--  } else {-->
+<!--    return null;-->
+<!--  }-->
+<!--}-->
+<!--  </script>-->
+?
+{% else %}
+<form method="post" action="{{ url_for('home') }}" enctype="multipart/form-data">
+    <input class="uk-input" type="text" id="org" name="org" style="width: 200px;" required>
+    <button class="uk-button" type="submit">submit</button>
+</form>
+
+{% endif %}
+</body>
+</html>

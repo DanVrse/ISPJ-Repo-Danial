@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<nav class="uk-navbar-container" uk-navbar>
+
+    <div class="uk-navbar-left">
+
+        <ul class="uk-navbar-nav">
+            <li class="uk-active"><a href="{{ url_for('home') }}">Home</a></li>
+            <li>
+            {% if root == True %}
+            <li class="uk-active"><a href="{{ url_for('assignrole') }}">Roles and Users</a></li>
+            <li>
+                {% endif %}
+
+        </ul>
+
+    </div>
+
+
+</nav>
+{% if ac == "RBAC" %}
+<form method="post" action="{{ url_for('assignrole') }}"
+      style="border:solid 2px black; width: 50%;margin: 5% 0 5% 20% ;padding: 50px;border-radius: 30px;">
+    <fieldset class="uk-fieldset" style="">
+
+        <legend class="uk-legend">Role assignment</legend>
+        <br><br>
+
+
+        <input class="uk-input uk-form-medium" value="assign" name="opt" placeholder="Role" style="width:20vw;" hidden>
+        <label for="email">Email: </label>
+        <input class="uk-input uk-form-medium" id="email" type="text" name="email" placeholder="Email"
+               style="width:20vw;"
+               required>
+        <br> <br>
+        <label for="password">Password: </label>
+        <input class="uk-input uk-form-medium strength_input" id="password" type="password" name="password"
+               placeholder="Password" style="width:20vw;" oninput="load();" required>
+        <br><br>
+        <label for="role">Roles:</label>
+        <select class="uk-select" name="role" id="role" required>
+
+            {% for role in roles %}
+            <option value="{{ role }}">{{ role }}</option>
+
+            {% endfor %}
+        </select>
+
+        <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">SUBMIT
+        </button>
+    </fieldset>
+</form>
+<form method="post" action="{{ url_for('assignrole') }}" enctype="multipart/form-data"
+      style="border:solid 2px black; width: 50%;margin: 5% 0 5% 20% ;padding: 50px;border-radius: 30px;">
+    <fieldset class="uk-fieldset" style="">
+
+        <legend class="uk-legend">Role Creation</legend>
+
+        <input class="uk-input uk-form-medium" value="create" name="opt" placeholder="Role" style="width:20vw;" hidden>
+        <input class="uk-input uk-form-medium" type="text" name="role" placeholder="Role" style="width:20vw;" required>
+
+        <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">SUBMIT
+        </button>
+    </fieldset>
+</form>
+{% elif ac == "DAC" %}
+
+<form method="post" action="{{ url_for('assignrole') }}">
+    <fieldset class="uk-fieldset">
+
+        <legend class="uk-legend">User Creation</legend>
+
+
+        <input class="uk-input uk-form-medium" type="text" name="email" placeholder="Email" style="width:20vw;"
+               required>
+        <input class="uk-input uk-form-medium strength_input" id="password" type="password" name="password"
+               placeholder="Password" style="width:20vw;" oninput="load();" required>
+        <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">SUBMIT
+        </button>
+    </fieldset>
+</form>
+
+
+{% endif %}
+<script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+
+
+</script>
+</body>
+</html>

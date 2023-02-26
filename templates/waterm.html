@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Watermark</title>
+</head>
+<body>
+<form method="post" action="{{ url_for( 'waterm') }}" enctype="multipart/form-data">
+<div class="js-upload" uk-form-custom>
+    <input type="file" name="water">
+    <button class="uk-button uk-button-default" type="button" tabindex="-1">Select</button>
+</div></form>
+<p>watermark:{{ validity }}</p>
+</body>
+</html>

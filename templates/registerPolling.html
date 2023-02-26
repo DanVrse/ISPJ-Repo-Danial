@@ -1,0 +1,34 @@
+<div id="message">
+<h5>Password must contain the following:</h5>
+
+{% if policyresult['lowercase_error'] %}
+<p id="letter" class="invalid">A <b>lowercase</b> letter</p>
+{% else %}
+<p id="letter" class="valid">A <b>lowercase</b> letter</p>
+{% endif %}
+
+{% if policyresult['uppercase_error'] %}
+<p id="capital" class="invalid">A <b>capital (uppercase)</b> letter</p>
+{% else %}
+<p id="capital" class="valid">A <b>capital (uppercase)</b> letter</p>
+{% endif %}
+
+{% if policyresult['digit_error'] %}
+<p id="number" class="invalid">A <b>number</b></p>
+{% else %}
+<p id="number" class="valid">A <b>number</b></p>
+{% endif %}
+
+{% if policyresult['Short_length_error'] or policyresult['Long_length_error'] %}
+<p id="length" class="invalid">Minimum <b>8 characters</b></p>
+{% else %}
+<p id="length" class="valid">Minimum <b>8 characters</b></p>
+{% endif %}
+
+
+{% if policyresult['symbol_error']  %}
+<p id="symbol" class="invalid"><b>Acceptable</b>  characters </p>
+{% else %}
+<p id="symbol" class="valid"><b>Acceptable</b>  characters</p>
+{% endif %}
+</div>

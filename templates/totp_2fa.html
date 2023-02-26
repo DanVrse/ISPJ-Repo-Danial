@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+    <title>Flask + 2FA Demo</title>
+</head>
+<body>
+  <div class="uk-section uk-section-muted uk-flex uk-flex-middle uk-animation-fade" uk-height-viewport>
+    <div class="uk-width-1-1">
+        <div class="uk-container">
+            <div class="uk-grid-margin uk-grid uk-grid-stack" uk-grid>
+                <div class="uk-width-1-1@m">
+                    <form method="post" id="form">
+
+                        <div class="uk-margin uk-width-large uk-margin-auto uk-card uk-card-default uk-card-body uk-box-shadow-large">
+                          <div class="jumbotron uk-text-center p-4">
+                            <h2>Flask + 2FA Demo</h2>
+                          </div>
+                              <h3 class="uk-card-title uk-text-center"><b>Setup and Authenticate 2FA</b></h3>
+                              <div>
+                                <h5>Instructions!</h5>
+                                <ul>
+                                  <li>Download <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US" target="_blank">Google Authenticator</a> on your mobile.</li>
+                                  <li>Create a new account with <strong>setup key</strong> method.</li>
+                                  <li>Provide the required details (name, secret key).</li>
+                                  <li>Select time-based authentication.</li>
+                                  <li>Submit the generated key in the form.</li>
+                                </ul>
+                              </div>
+                            {% if session['vCodeType'] == 'qrCode' %}
+                                  <img src="/static/qrCodeAuth.jpg" alt="" width="330" height="330"/>
+                            {% endif %}
+                              <div hidden class="form-group">
+                                  <label for="secret">Secret Token</label>
+                                  <input type="text" class="form-control" id="secret" value="{{ secret }}" readonly>
+                                </div>
+                            </div>
+                        <div class="uk-margin uk-width-large uk-margin-auto uk-card uk-card-default uk-card-body uk-box-shadow-large">
+                            <form method="POST">
+                              <div class="form-group">
+                                <label for="otp">Generated OTP</label>
+                                <input type="hidden" name="secret" value="{{ secret }}" required>
+                                <input type="number" class="form-control" id="otp" name="otp" required>
+                              </div>
+
+                            </form>
+                            <div class="uk-margin">
+                                <button style="background-color: orange;" class="uk-button uk-button-primary uk-button-large uk-width-1-1">Login</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+      <div class="col-lg-7">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" role="alert">
+          {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+      </div>
+    </div>
+</div>
+
+  <script>
+    function copySecret() {
+      /* Get the text field */
+      var copyText = document.getElementById("secret");
+
+      /* Select the text field */
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+      /* Copy the text inside the text field */
+      document.execCommand("copy");
+
+      alert("Successfully copied TOTP secret token!");
+    }
+  </script>
+</body>

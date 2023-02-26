@@ -1,0 +1,94 @@
+@import "bourbon";
+
+$grey:       #BCBCBC; // Silver
+$light-grey: #ECECEC; // Mercury
+$blue:       #08c;    // Lochmara
+
+*, *:before, *:after {
+    @include box-sizing(border-box);
+}
+
+html {
+  font-size: 14px;
+  margin: 20px 50px 0;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+h1 {
+  font-size: 1.25rem;
+  margin: 0 0 1rem;
+}
+
+
+@mixin toggle-switch {
+    display: none;
+
+    & + label {
+        @include transition(.3s background);
+        @include user-select(none);
+
+        cursor: pointer;
+        position: relative;
+        display: inline-block;
+        height: 2em;
+        width: 4em;
+        background: $light-grey;
+        border-radius: 20em;
+        vertical-align: middle;
+
+        &:before,
+        &:after {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        &:before {
+            @include transition(.3s left);
+
+            content: '';
+            display: inline-block;
+            background: rgba(0, 0, 0, .5);
+            height: 1.5em;
+            width: 1.5em;
+            margin: .25em;
+            border-radius: 50%;
+            z-index: 200;
+        }
+
+        &:after {
+          color: #fff;
+          content: '\f00d';
+          font: 1.25em 'FontAwesome';
+          top: 50%;
+          margin-top: -.5em;
+          left: 2em;
+        }
+    }
+
+    &:checked + label {
+        background: $blue;
+
+        &:before {
+          left: 2em;
+        }
+
+        &:after {
+          content: '\f00c';
+          left: .5em;
+        }
+    }
+}
+
+
+input[type="checkbox"] {
+    @include toggle-switch;
+}
+
+input + label {
+  margin-right: 20px;
+}
+
+div {
+  margin-bottom: 2rem;
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+</head>
+<body>
+</body>
+</html>
+{% include 'includes/_navbar.html' %}
+<div class="uk-section uk-section-muted uk-flex uk-flex-middle uk-animation-fade" uk-height-viewport>
+    <div class="uk-width-1-1">
+        <div class="uk-container">
+            <div class="uk-grid-margin uk-grid uk-grid-stack" uk-grid>
+                <div class="uk-width-1-1@m">
+                    <form method="post" id="form">
+                        <input hidden id="vCodeType" name="vCodeType" type="text" value="">
+                        <input hidden id="resend" name="resend" type="text" value="no">
+
+                        <div class="uk-margin uk-width-large uk-margin-auto uk-card uk-card-default uk-card-body uk-box-shadow-large">
+                            <h3 class="uk-card-title uk-text-center">A code has been sent to you through your email. <b>Check it.</b></h3>
+    <!--                        <button onclick="document.getElementById('vCodeType').value = 'email';document.getElementById('form').submit()" type="button" class="btn btn-outline-dark btn-block emailBtn">Email</button>-->
+                            <div class="uk-margin">
+                                <div class="uk-inline uk-width-1-1">
+                                    <span class="uk-form-icon" uk-icon="icon: mail"></span>
+                                    <input name="vCodeVerify" class="uk-input uk-form-large" type="text" placeholder="Enter the code.">
+                                </div>
+                            </div>
+                            <div class="uk-margin">
+                                <button style="background-color: orange;" class="uk-button uk-button-primary uk-button-large uk-width-1-1">Login</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+//check for Navigation Timing API support
+if (window.performance) {
+  console.info("window.performance works fine on this browser");
+}
+console.info(performance.navigation.type);
+if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+  console.info( "This page is reloaded" );
+} else {
+  console.info( "This page is not reloaded");
+}
+</script>

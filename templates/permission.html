@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Permissions</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+</head>
+<body>
+<nav class="uk-navbar-container" uk-navbar>
+
+    <div class="uk-navbar-left">
+
+        <ul class="uk-navbar-nav">
+            <li class="uk-active"><a href="{{ url_for('home') }}">Home</a></li>
+            <li>
+            {% if root == True %}
+            <li class="uk-active"><a href="{{ url_for('assignrole') }}">Roles and Users</a></li>
+            <li>
+                {% endif %}
+
+        </ul>
+
+    </div>
+
+
+</nav>
+
+<table class="uk-table uk-table-striped">
+    <thead>
+        <tr>
+            <th>Users</th>
+            <th>Permissions</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+{% for i in range(permroles|length) %}
+<tr>
+
+            <td>{{ permroles[i] }}</td>
+
+
+
+
+
+
+
+            <td>{{ perms[i] }}</td>
+         </tr>  {% endfor %}
+
+
+    </tbody>
+</table>
+
+
+
+
+
+<form method="post" enctype="multipart/form-data">
+    <fieldset class="uk-fieldset">
+
+        <legend class="uk-legend">Permission assignment</legend>
+        <input name="option" value="permission" hidden>
+
+        {% if ac == "DAC" %}
+<select name="role" id="role" class="uk-select" required>
+
+            {% for role in roles %}
+            <option value="{{ role }}">{{ role }}</option>
+
+            {% endfor %}
+
+        </select>        <label for="role">Users</label>
+        {% elif ac == "RBAC" %}
+        <label for="role">Roles</label>
+        <select name="role" id="role" class="uk-select" required>
+
+            {% for role in roles %}
+            <option value="{{ role }}">{{ role }}</option>
+
+            {% endfor %}
+
+        </select>
+            {% endif %}
+
+            <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                <label><input class="uk-checkbox" type="checkbox" name="Full Control" value="F">Full Control</label>
+                <label><input class="uk-checkbox" type="checkbox" name="Modify" value="M">Modify</label>
+                <label><input class="uk-checkbox" type="checkbox" name="Read" value="R">Read</label>
+                <label><input class="uk-checkbox" type="checkbox" name="Delete" value="D">Delete</label>
+            </div>
+
+            <button class="uk-button uk-button-secondary uk-button-large" style="margin: 1%;border-radius: 10px;">
+                SUBMIT
+            </button>
+    </fieldset>
+</form>
+</body>
+</html>

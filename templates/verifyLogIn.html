@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify LogIn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/css/uikit.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.9.4/dist/js/uikit-icons.min.js"></script>
+</head>
+<body>
+</body>
+</html>
+<div class="uk-section uk-section-muted uk-flex uk-flex-middle uk-animation-fade" uk-height-viewport>
+    <div class="uk-width-1-1">
+        <div class="uk-container">
+            <div class="uk-grid-margin uk-grid uk-grid-stack" uk-grid>
+                <div class="uk-width-1-1@m">
+                    {% if session['Vauthentication'] == 'Failed' %}
+                    <p>Invalid 6-Digit Code!</p>
+                    {% endif %}
+
+                    <form method="post" id="form"></form>
+
+                    <div class="uk-margin uk-width-large uk-margin-auto uk-card uk-card-default uk-card-body uk-box-shadow-large">
+                        <h3 class="uk-card-title uk-text-center">You're one step away! Choose your authentication method.</h3>
+                        <input hidden id="vCodeType" name="vCodeType" type="text" value="">
+                        <input hidden id="resend" name="resend" type="text" value="no">
+                            <div class="uk-margin">
+                                <button onclick="document.getElementById('vCodeType').value = 'email';document.getElementById('form').submit()" type="button" class="uk-button uk-button-default uk-button-large uk-width-1-1">Email</button>
+                            </div>
+                            <div class="uk-margin">
+                                <button onclick="document.getElementById('vCodeType').value = 'GAuth';document.getElementById('form').submit()" type="button" class="uk-button uk-button-default uk-button-large uk-width-1-1">Google Authenticator</button>
+                            </div>
+                            <div class="uk-margin">
+                                <button onclick="document.getElementById('vCodeType').value = 'face';document.getElementById('form').submit()" type="button" class="uk-button uk-button-default uk-button-large uk-width-1-1">Face ID</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
