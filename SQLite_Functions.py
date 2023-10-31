@@ -1,25 +1,30 @@
 import sqlite3, csv, os
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Main functions available: Create, Register, Login, Query, Update
+
 # Database Creation
 def db_Create(orgPath):
     print('\ndb_Create: STARTING...\n')
     conn = None
     try:
-        # conn = sqlite3.connect('static/User_Folder/cred_DB.db')
+        # conn = sqlite3.connect('static/User_Folder/cred_DB.db') <-- non-relative assignment (better not use)
         dbPath = os.path.join(orgPath, 'orgDB.db')
         conn = sqlite3.connect(dbPath)
         c = conn.cursor()
 
+		# Creates a new SQLITE table in the database, with new variables (Primary + Secondary Key etc)
         c.execute('CREATE TABLE IF NOT EXISTS userList'
                   '([email] TEXT PRIMARY KEY, [username] TEXT NOT NULL UNIQUE, '
                   '[password] TEXT NOT NULL, [role] TEXT, [phone_number] TEXT NOT NULL, [verified] TEXT NOT NULL);')
 
         print('\nNew TABLE created!\n')
 
+	# Error Handling with SQLite Database
     except sqlite3.Error as error:
         print("Error while connecting to sqlite", error)
 
+	# Final Output after process
     finally:
         if conn:
             print("Total Rows affected since the database connection was opened: ", conn.total_changes)
@@ -56,6 +61,7 @@ def db_Register(userObj, orgPath):
             if found_email == register_email:
                 existEmail = True
 
+		# If existEmail flag is True, nothing happens.
         if existEmail:
             return 'This email exists!'
 
